@@ -2,9 +2,10 @@ import * as fs from "fs";
 
 
 let config = {
-    dir: "/users/jard/downloads/statewide_rf_mm/rf_mm",
+    dir: "./rf_mm",
     output: "./index.json",
-    metadata: {
+    setIdentifiers: {
+        type: "raster",
         unit: "mm",
         extent: "state",
         version: "v1.0",
@@ -12,6 +13,8 @@ let config = {
         datatype: "rainfall",
         dataset: "new", //alternate "legacy" (Abby's)
         coverage: "1990-p",
+    },
+    subMeta: {
         year: null,
         month: null,
         day: null
@@ -49,16 +52,19 @@ function copyJSON(json: any) {
     return JSON.parse(JSON.stringify(json));
 }
 
-let allMeta: {[fname: string]: any} = {}
+let allMeta: {datasetID: any, files: {[fname: string]: any}} = {
+    datasetID: config.setIdentifiers,
+    files: {}
+}
 
 fs.readdir(config.dir, (e, files) => {
     if(e) {
         throw e;
     }
     for(let file of files) {
-        let meta = copyJSON(config.metadata);
+        let meta = copyJSON(config.subMeta);
         fillMetadataFromFname(file, meta, config.nameFormat);
-        allMeta[file] = meta;
+        allMeta.files[file] = meta;
     }
     fs.writeFile(config.output, JSON.stringify(allMeta, null, 2), (e) => {
         if(e) {
