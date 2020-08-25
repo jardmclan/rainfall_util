@@ -1,0 +1,12 @@
+{
+    "processes": 2,
+    "indexFile": "./index.json",
+    "loopThrottle": 5,
+    "apiSpawnLimit": 2,
+    "includeHeader": true,
+    "cleanup": true,
+    "retry": 3,
+    "name": "test_2",
+    "input": "./rf_mm",
+    "output": "./output"
+}
