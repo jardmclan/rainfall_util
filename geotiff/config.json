@@ -1,12 +1,12 @@
 {
-    "processes": 2,
+    "processes": 10,
     "indexFile": "./index.json",
-    "loopThrottle": 5,
+    "loopThrottle": 1,
     "apiSpawnLimit": 2,
     "includeHeader": true,
     "cleanup": true,
     "retry": 3,
-    "name": "test_2",
+    "name": "pass4",
     "input": "./rf_mm",
     "output": "./output"
 }

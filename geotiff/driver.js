@@ -1,5 +1,7 @@
 
-let configFile = "./config.json";
+let configFile = process.argv[2];
+
+
 const config = require(configFile);
 const {fork} = require("child_process");
 
@@ -61,10 +63,10 @@ for(let range of ranges) {
 
     let child = fork("geotiffDriver", [JSON.stringify(subConfig)]);
 
-    child.on("exit", (code) => {
+    child.on("exit", (code, signal) => {
         if(code != 0) {
             //should write log of errors etc for children
-            errorExit(`Child process failed with non-zero exit code. See log for details. Exit code ${code}. Terminating program.`);
+            errorExit(`Child process failed with non-zero exit code. Exit code ${code}, signal ${signal}. Terminating program.`);
         }
     });
     children.push(child);

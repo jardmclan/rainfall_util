@@ -88,8 +88,8 @@ function ingestData(fname, metadata, cleanup, container) {
 //no communication, set data handler
 
 function dataHandlerRecursive(fname, metadata, retryLimit, cleanup, container, attempt = 0) {
-    return ingestData(fname, metadata, cleanup, container).then((error) => {
-        return error;
+    return ingestData(fname, metadata, cleanup, container).then((uuid) => {
+        return uuid;
     }, (error) => {
         if(attempt >= retryLimit) {
             return Promise.reject(error);

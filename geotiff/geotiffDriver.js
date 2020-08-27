@@ -29,6 +29,7 @@ const rasterBase = index.datasetID;
 
 const headerBase = {
     type: "header",
+    extent: "state",
     version: rasterBase.version
 };
 
@@ -43,6 +44,8 @@ let docNum = range[0];
 //assumes order returned by Object.keys is stable, should be
 let files = Object.keys(index.files);
 
+// console.log(range);
+
 for(let i = range[0]; i < range[1]; i++) {
     throttle.acquire().then(() => {
         let file = files[i];
@@ -54,10 +57,15 @@ for(let i = range[0]; i < range[1]; i++) {
                 constructSubmitMeta(headerBase, data.header, null);
             }
             metadata.data = data.values;
-            let cb = isLatest(metadata) ? (uuid) => {constructSubmitMeta(latestBase, {uuid: uuid}, null)} : null
+            let cb = (uuid) => {
+                if(isLatest(metadata)) {
+                    constructSubmitMeta(latestBase, {uuid: uuid}, null);
+                }
+                throttle.release();
+            }
             //submit to api
             constructSubmitMeta(rasterBase, metadata, cb);
-            throttle.release();
+            
         });
     });
 }
@@ -68,19 +76,20 @@ function constructSubmitMeta(metaBase, meta, cb) {
     Object.assign(metadata, meta);
     let wrapped = cpJSON(wrapper);
     wrapped.value = metadata;
-    apiThrottle.acquire().then(() => {
-        handler.dataHandler(path.join(outDir, `${uuidv4()}.json`), wrapped, retryLimit, cleanup).then((uuid) => {
-            if(cb != null) {
-                cb(uuid);
-            }
-            apiThrottle.release();
-            console.log("complete");
-        }, (e) => {
-            console.error(e.toString());
-            console.error("Ingestion failed");
-            process.exit(1);
-        });
+    //apiThrottle.acquire().then(() => {
+    handler.dataHandler(path.join(outDir, `${uuidv4()}.json`), wrapped, retryLimit, cleanup).then((uuid) => {
+        if(cb != null) {
+            cb(uuid);
+        }
+        
+        //apiThrottle.release();
+        console.log(uuid);
+    }, (e) => {
+        console.error(e.toString());
+        console.error("Ingestion failed");
+        process.exit(1);
     });
+    //});
     
 }
 
@@ -124,3 +133,9 @@ function cpJSON(json) {
 function isLatest(metadata) {
     return metadata.year == 2019 && metadata.month == 12;
 }
+
+
+process.on('uncaughtException', (err) => {
+    console.log(`Caught exception: ${err}`);
+    process.exit(2);
+});
